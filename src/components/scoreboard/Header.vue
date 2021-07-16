@@ -1,0 +1,78 @@
+<template>
+   <div class="th">
+        <div v-for="(label, index) in labels" class="td" :key="index">{{label}}</div>
+   </div>
+
+</template>
+
+<script>
+
+export default {
+  name: "header",
+  mounted() {
+    console.log(this.labels)
+    },
+  props: {
+    labels: {
+      type: Array
+    },
+    bold: {
+      type: Boolean,
+      default: false
+    }
+  }
+}
+</script>
+
+<style scoped>
+.outline {
+  border-bottom: aquamarine;
+}.table {
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: .8rem;
+  margin: 0.5rem;
+  line-height: 1.5;
+  border-bottom: 1px solid #d0d0d0;
+  flex: 1 1 auto;
+}
+
+.th {
+  display: none;
+  font-weight: 700;
+  background-color: #f2f2f2;
+}
+
+.th > .td {
+  white-space: normal;
+  justify-content: center;
+}
+
+.tr {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.tr:nth-of-type(even) {
+  background-color: #f2f2f2;
+}
+
+.tr:nth-of-type(odd) {
+  background-color: #ffffff;
+}
+
+.td {
+  display: flex;
+  flex-flow: row nowrap;
+  flex-grow: 1;
+  flex-basis: 0;
+  padding: 0.5em;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0px;
+  white-space: nowrap;
+  border-bottom: 1px solid #d0d0d0;
+}
+</style>

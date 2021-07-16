@@ -1,9 +1,12 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
+    <b-container class="d-flex flex-column align-content-center justify-content-center p-3">
+      <banner/>
+      <nav id="nav" hidden>
+        <router-link to="/">Home</router-link> |
+        <router-link to="/about">About</router-link>
+      </nav>
+    </b-container>
     <router-view/>
   </div>
 </template>
@@ -17,10 +20,6 @@
   color: #2c3e50;
 }
 
-#nav {
-  padding: 30px;
-}
-
 #nav a {
   font-weight: bold;
   color: #2c3e50;
@@ -30,3 +29,10 @@
   color: #42b983;
 }
 </style>
+<script>
+import Banner from "@/components/Banner";
+
+export default {
+  components: {Banner}
+}
+</script>

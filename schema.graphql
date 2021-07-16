@@ -1,0 +1,683 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type AddGroupPayload {
+    group: [Group]
+}
+
+type AddUserPayload {
+    user: [User]
+}
+
+type AssignPayload {
+    response: AssignedIds
+}
+
+type AssignedIds {
+    "The last UID, TIMESTAMP or NAMESPACE_ID assigned."
+    endId: UInt64
+    "TIMESTAMP for read-only transactions."
+    readOnly: UInt64
+    "The first UID, TIMESTAMP or NAMESPACE_ID assigned."
+    startId: UInt64
+}
+
+type BackupGroup {
+    "The ID of the cluster group."
+    groupId: UInt64
+    "List of predicates assigned to the group."
+    predicates: [String]
+}
+
+type BackupPayload {
+    response: Response
+    taskId: String
+}
+
+type ClusterGroup {
+    checksum: UInt64
+    id: UInt64
+    members: [Member]
+    snapshotTs: UInt64
+    tablets: [Tablet]
+}
+
+type Config {
+    cacheMb: Float
+}
+
+type ConfigPayload {
+    response: Response
+}
+
+type DeleteGroupPayload {
+    msg: String
+    numUids: Int
+}
+
+type DeleteUserPayload {
+    msg: String
+    numUids: Int
+}
+
+type DrainingPayload {
+    response: Response
+}
+
+type EnterpriseLicensePayload {
+    response: Response
+}
+
+type ExportPayload {
+    response: Response
+    taskId: String
+}
+
+"Data about the GraphQL schema being served by Dgraph."
+type GQLSchema {
+    """
+
+    The GraphQL schema that was generated from the 'schema' field.
+    This is the schema that is being served by Dgraph at /graphql.
+    """
+    generatedSchema: String!
+    id: ID!
+    "Input schema (GraphQL types) that was used in the latest schema update."
+    schema: String!
+}
+
+type Group {
+    "Name of the group.  Dgraph ensures uniqueness of group names."
+    name: String!
+    rules: [Rule]
+    users: [User]
+}
+
+type License {
+    enabled: Boolean
+    expiryTs: Int64
+    maxNodes: UInt64
+    user: String
+}
+
+type LoginPayload {
+    response: LoginResponse
+}
+
+type LoginResponse {
+    "JWT token that should be used in future requests after this login."
+    accessJWT: String
+    "Refresh token that can be used to re-login after accessJWT expires."
+    refreshJWT: String
+}
+
+type Manifest {
+    "Unique ID for the backup series."
+    backupId: String
+    "Number of this backup within the backup series. The full backup always has a value of one."
+    backupNum: UInt64
+    "Whether this backup was encrypted."
+    encrypted: Boolean
+    "List of groups and the predicates they store in this backup."
+    groups: [BackupGroup]
+    "Path to the manifest file."
+    path: String
+    """
+
+    The timestamp at which this backup was taken. The next incremental backup will
+    start from this timestamp.
+    """
+    since: UInt64
+    "The type of backup, either full or incremental."
+    type: String
+}
+
+type Member {
+    addr: String
+    amDead: Boolean
+    clusterInfoOnly: Boolean
+    forceGroupId: Boolean
+    groupId: UInt64
+    id: UInt64
+    lastUpdate: UInt64
+    leader: Boolean
+}
+
+type MembershipState {
+    cid: String
+    counter: UInt64
+    groups: [ClusterGroup]
+    license: License
+    maxNsID: UInt64
+    maxRaftId: UInt64
+    maxTxnTs: UInt64
+    maxUID: UInt64
+    removed: [Member]
+    zeros: [Member]
+}
+
+type MoveTabletPayload {
+    response: Response
+}
+
+type Mutation {
+    "Add a new group and (optionally) set the rules for the group."
+    addGroup(input: [AddGroupInput!]!): AddGroupPayload
+    "Add a new namespace."
+    addNamespace(input: AddNamespaceInput): NamespacePayload
+    """
+
+    Add a user.  When linking to groups: if the group doesn't exist it is created; if the group
+    exists, the new user is linked to the existing group.  It's possible to both create new
+    groups and link to existing groups in the one mutation.
+
+    Dgraph ensures that usernames are unique, hence attempting to add an existing user results
+    in an error.
+    """
+    addUser(input: [AddUserInput!]!): AddUserPayload
+    "Lease UIDs, Timestamps or Namespace IDs in advance."
+    assign(input: AssignInput!): AssignPayload
+    "Start a binary backup.  See : https://dgraph.io/docs/enterprise-features/#binary-backups"
+    backup(input: BackupInput!): BackupPayload
+    "Alter the node's config."
+    config(input: ConfigInput!): ConfigPayload
+    deleteGroup(filter: GroupFilter!): DeleteGroupPayload
+    "Delete a namespace."
+    deleteNamespace(input: DeleteNamespaceInput!): NamespacePayload
+    deleteUser(filter: UserFilter!): DeleteUserPayload
+    "Set (or unset) the cluster draining mode.  In draining mode no further requests are served."
+    draining(enable: Boolean): DrainingPayload
+    "Apply enterprise license."
+    enterpriseLicense(input: EnterpriseLicenseInput!): EnterpriseLicensePayload
+    """
+
+    Starts an export of all data in the cluster.  Export format should be 'rdf' (the default
+    if no format is given), or 'json'.
+    See : https://dgraph.io/docs/deploy/#export-database
+    """
+    export(input: ExportInput!): ExportPayload
+    """
+
+    Login to Dgraph.  Successful login results in a JWT that can be used in future requests.
+    If login is not successful an error is returned.
+    """
+    login(namespace: Int, password: String, refreshToken: String, userId: String): LoginPayload
+    "Move a predicate from one group to another."
+    moveTablet(input: MoveTabletInput!): MoveTabletPayload
+    "Remove a node from the cluster."
+    removeNode(input: RemoveNodeInput!): RemoveNodePayload
+    """
+
+    Reset password can only be used by the Guardians of the galaxy to reset password of
+    any user in any namespace.
+    """
+    resetPassword(input: ResetPasswordInput!): ResetPasswordPayload
+    """
+
+    Start restoring a binary backup.  See :
+    https://dgraph.io/docs/enterprise-features/#binary-backups
+    """
+    restore(input: RestoreInput!): RestorePayload
+    "Shutdown this node."
+    shutdown: ShutdownPayload
+    """
+
+    Update the Dgraph cluster to serve the input schema.  This may change the GraphQL
+    schema, the types and predicates in the Dgraph schema, and cause indexes to be recomputed.
+    """
+    updateGQLSchema(input: UpdateGQLSchemaInput!): UpdateGQLSchemaPayload
+    """
+
+    Add or remove rules for groups. If the filter doesn't match any groups,
+    the mutation has no effect.
+    """
+    updateGroup(input: UpdateGroupInput!): AddGroupPayload
+    """
+
+    Update users, their passwords and groups.  As with AddUser, when linking to groups: if the
+    group doesn't exist it is created; if the group exists, the new user is linked to the existing
+    group.  If the filter doesn't match any users, the mutation has no effect.
+    """
+    updateUser(input: UpdateUserInput!): AddUserPayload
+}
+
+type NamespacePayload {
+    message: String
+    namespaceId: UInt64
+}
+
+"A NodeState is the state of an individual node in the Dgraph cluster."
+type NodeState {
+    "Address of the node."
+    address: String
+    "List of Enterprise Features that are enabled."
+    ee_features: [String]
+    """
+
+    The group this node belongs to in the Dgraph cluster.
+    See : https://dgraph.io/docs/deploy/#cluster-setup.
+    """
+    group: String
+    "List of predicates for which indexes are built in the background."
+    indexing: [String]
+    "Node type : either 'alpha' or 'zero'."
+    instance: String
+    "Time in Unix epoch time that the node was last contacted by another Zero or Alpha node."
+    lastEcho: Int64
+    "List of ongoing operations in the background."
+    ongoing: [String]
+    "Node health status : either 'healthy' or 'unhealthy'."
+    status: String
+    "Time in nanoseconds since the node started."
+    uptime: Int64
+    "Version of the Dgraph binary."
+    version: String
+}
+
+type Query {
+    config: Config
+    "Get the currently logged in user."
+    getCurrentUser: User
+    getGQLSchema: GQLSchema
+    getGroup(name: String!): Group
+    getUser(name: String!): User
+    health: [NodeState]
+    "Get the information about the backups at a given location."
+    listBackups(input: ListBackupsInput!): [Manifest]
+    queryGroup(filter: GroupFilter, first: Int, offset: Int, order: GroupOrder): [Group]
+    queryUser(filter: UserFilter, first: Int, offset: Int, order: UserOrder): [User]
+    state: MembershipState
+    task(input: TaskInput!): TaskPayload
+}
+
+type RemoveNodePayload {
+    response: Response
+}
+
+type ResetPasswordPayload {
+    message: String
+    namespace: UInt64
+    userId: String
+}
+
+type Response {
+    code: String
+    message: String
+}
+
+type RestorePayload {
+    "A short string indicating whether the restore operation was successfully scheduled."
+    code: String
+    "Includes the error message if the operation failed."
+    message: String
+}
+
+type Rule {
+    """
+
+    Permissions that apply for the rule.  Represented following the UNIX file permission
+    convention. That is, 4 (binary 100) represents READ, 2 (binary 010) represents WRITE,
+    and 1 (binary 001) represents MODIFY (the permission to change a predicate’s schema).
+
+    The options are:
+    * 1 (binary 001) : MODIFY
+    * 2 (010) : WRITE
+    * 3 (011) : WRITE+MODIFY
+    * 4 (100) : READ
+    * 5 (101) : READ+MODIFY
+    * 6 (110) : READ+WRITE
+    * 7 (111) : READ+WRITE+MODIFY
+
+    Permission 0, which is equal to no permission for a predicate, blocks all read,
+    write and modify operations.
+    """
+    permission: Int!
+    "Predicate to which the rule applies."
+    predicate: String!
+}
+
+type ShutdownPayload {
+    response: Response
+}
+
+type Tablet {
+    force: Boolean
+    groupId: UInt64
+    moveTs: UInt64
+    predicate: String
+    readOnly: Boolean
+    remove: Boolean
+    space: Int
+}
+
+type TaskPayload {
+    kind: TaskKind
+    lastUpdated: DateTime
+    status: TaskStatus
+}
+
+type UpdateGQLSchemaPayload {
+    gqlSchema: GQLSchema
+}
+
+type User {
+    groups: [Group]
+    "Username for the user.  Dgraph ensures that usernames are unique."
+    name: String!
+}
+
+enum AssignKind {
+    NAMESPACE_ID
+    TIMESTAMP
+    UID
+}
+
+enum GroupOrderable {
+    name
+}
+
+enum TaskKind {
+    Backup
+    Export
+    Unknown
+}
+
+enum TaskStatus {
+    Failed
+    Queued
+    Running
+    Success
+    Unknown
+}
+
+enum UserOrderable {
+    name
+}
+
+input AddGroupInput {
+    name: String!
+    rules: [RuleRef]
+}
+
+input AddNamespaceInput {
+    password: String
+}
+
+input AddUserInput {
+    groups: [GroupRef]
+    name: String!
+    password: String!
+}
+
+input AssignInput {
+    "How many to assign."
+    num: UInt64!
+    "Choose what to assign: UID, TIMESTAMP or NAMESPACE_ID."
+    what: AssignKind!
+}
+
+input BackupInput {
+    "Access key credential for the destination."
+    accessKey: String
+    "Set to true to allow backing up to S3 or Minio bucket that requires no credentials."
+    anonymous: Boolean
+    "Destination for the backup: e.g. Minio or S3 bucket."
+    destination: String!
+    "Force a full backup instead of an incremental backup."
+    forceFull: Boolean
+    "Secret key credential for the destination."
+    secretKey: String
+    "AWS session token, if required."
+    sessionToken: String
+}
+
+input ConfigInput {
+    """
+
+    Estimated memory the caches can take. Actual usage by the process would be
+    more than specified here. The caches will be updated according to the
+    cache_percentage flag.
+    """
+    cacheMb: Float
+    """
+
+    True value of logRequest enables logging of all the requests coming to alphas.
+    False value of logRequest disables above.
+    """
+    logRequest: Boolean
+}
+
+input DeleteNamespaceInput {
+    namespaceId: Int!
+}
+
+input EnterpriseLicenseInput {
+    "The contents of license file as a String."
+    license: String!
+}
+
+input ExportInput {
+    "Access key credential for the destination."
+    accessKey: String
+    "Set to true to allow backing up to S3 or Minio bucket that requires no credentials."
+    anonymous: Boolean
+    "Destination for the export: e.g. Minio or S3 bucket or /absolute/path"
+    destination: String
+    "Data format for the export, e.g. \"rdf\" or \"json\" (default: \"rdf\")"
+    format: String
+    """
+
+    Namespace for the export in multi-tenant cluster. Users from guardians of galaxy can export
+    all namespaces by passing a negative value or specific namespaceId to export that namespace.
+    """
+    namespace: Int
+    "Secret key credential for the destination."
+    secretKey: String
+    "AWS session token, if required."
+    sessionToken: String
+}
+
+input GQLSchemaPatch {
+    schema: String!
+}
+
+input GroupFilter {
+    and: UserFilter
+    name: StringHashFilter
+    not: UserFilter
+    or: UserFilter
+}
+
+input GroupOrder {
+    asc: GroupOrderable
+    desc: GroupOrderable
+    then: GroupOrder
+}
+
+input GroupRef {
+    name: String!
+}
+
+input ListBackupsInput {
+    "Access key credential for the destination."
+    accessKey: String
+    "Whether the destination doesn't require credentials (e.g. S3 public bucket)."
+    anonymous: Boolean
+    "Destination for the backup: e.g. Minio or S3 bucket."
+    location: String!
+    "Secret key credential for the destination."
+    secretKey: String
+    "AWS session token, if required."
+    sessionToken: String
+}
+
+input MoveTabletInput {
+    "ID of the destination group where the predicate is to be moved."
+    groupId: UInt64!
+    "Namespace in which the predicate exists."
+    namespace: UInt64
+    "Name of the predicate to move."
+    tablet: String!
+}
+
+input RemoveGroupPatch {
+    rules: [String!]!
+}
+
+input RemoveNodeInput {
+    "ID of the group from which the node is to be removed."
+    groupId: UInt64!
+    "ID of the node to be removed."
+    nodeId: UInt64!
+}
+
+input ResetPasswordInput {
+    namespace: Int!
+    password: String!
+    userId: String!
+}
+
+input RestoreInput {
+    "Access key credential for the destination."
+    accessKey: String
+    "Set to true to allow backing up to S3 or Minio bucket that requires no credentials."
+    anonymous: Boolean
+    """
+
+    Backup ID of the backup series to restore. This ID is included in the manifest.json file.
+    If missing, it defaults to the latest series.
+    """
+    backupId: String
+    """
+
+    Number of the backup within the backup series to be restored. Backups with a greater value
+    will be ignored. If the value is zero or missing, the entire series will be restored.
+    """
+    backupNum: Int
+    """
+
+    Path to the key file needed to decrypt the backup. This file should be accessible
+    by all alphas in the group. The backup will be written using the encryption key
+    with which the cluster was started, which might be different than this key.
+    """
+    encryptionKeyFile: String
+    "Destination for the backup: e.g. Minio or S3 bucket."
+    location: String!
+    "Secret key credential for the destination."
+    secretKey: String
+    "AWS session token, if required."
+    sessionToken: String
+    """
+
+    Vault server address where the key is stored. This server must be accessible
+    by all alphas in the group. Default "http://localhost:8200".
+    """
+    vaultAddr: String
+    "Vault kv store field whose value is the key. Default \"enc_key\"."
+    vaultField: String
+    "Vault kv store field's format. Must be \"base64\" or \"raw\". Default \"base64\"."
+    vaultFormat: String
+    "Vault kv store path where the key lives. Default \"secret/data/dgraph\"."
+    vaultPath: String
+    "Path to the Vault RoleID file."
+    vaultRoleIDFile: String
+    "Path to the Vault SecretID file."
+    vaultSecretIDFile: String
+}
+
+input RuleRef {
+    """
+
+    Permissions that apply for the rule.  Represented following the UNIX file permission
+    convention. That is, 4 (binary 100) represents READ, 2 (binary 010) represents WRITE,
+    and 1 (binary 001) represents MODIFY (the permission to change a predicate’s schema).
+
+    The options are:
+    * 1 (binary 001) : MODIFY
+    * 2 (010) : WRITE
+    * 3 (011) : WRITE+MODIFY
+    * 4 (100) : READ
+    * 5 (101) : READ+MODIFY
+    * 6 (110) : READ+WRITE
+    * 7 (111) : READ+WRITE+MODIFY
+
+    Permission 0, which is equal to no permission for a predicate, blocks all read,
+    write and modify operations.
+    """
+    permission: Int!
+    "Predicate to which the rule applies."
+    predicate: String!
+}
+
+input SetGroupPatch {
+    rules: [RuleRef!]!
+}
+
+input StringHashFilter {
+    eq: String
+}
+
+input TaskInput {
+    id: String!
+}
+
+input UpdateGQLSchemaInput {
+    set: GQLSchemaPatch!
+}
+
+input UpdateGroupInput {
+    filter: GroupFilter!
+    remove: RemoveGroupPatch
+    set: SetGroupPatch
+}
+
+input UpdateUserInput {
+    filter: UserFilter!
+    remove: UserPatch
+    set: UserPatch
+}
+
+input UserFilter {
+    and: UserFilter
+    name: StringHashFilter
+    not: UserFilter
+    or: UserFilter
+}
+
+input UserOrder {
+    asc: UserOrderable
+    desc: UserOrderable
+    then: UserOrder
+}
+
+input UserPatch {
+    groups: [GroupRef]
+    password: String
+}
+
+input UserRef {
+    name: String!
+}
+
+
+"""
+The Int64 scalar type represents a signed 64‐bit numeric non‐fractional value.
+Int64 can represent values in range [-(2^63),(2^63 - 1)].
+"""
+scalar Int64
+
+"""
+The UInt64 scalar type represents an unsigned 64‐bit numeric non‐fractional value.
+UInt64 can represent values in range [0,(2^64 - 1)].
+"""
+scalar UInt64
+
+"""
+The DateTime scalar type represents date and time as a string in RFC3339 format.
+For example: "1985-04-12T23:20:50.52Z" represents 20 minutes and 50.52 seconds after the 23rd hour of April 12th, 1985 in UTC.
+"""
+scalar DateTime

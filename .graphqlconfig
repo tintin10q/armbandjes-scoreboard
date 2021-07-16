@@ -1,0 +1,16 @@
+{
+  "name": "Dgraph bracelet GraphQL Schema",
+  "schemaPath": "schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "Default GraphQL Endpoint": {
+        "url": "https://cold-rain.eu-central-1.aws.cloud.dgraph.io/admin",
+        "headers": {
+          "user-agent": "JS GraphQL",
+          "Dg-Auth": "NTE2OTcxOGQxMTJjZWY3YzdkM2MwYTUzNGI2MGQ1ZWE="
+        },
+        "introspect": false
+      }
+    }
+  }
+}
