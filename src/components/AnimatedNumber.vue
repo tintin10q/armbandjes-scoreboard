@@ -33,6 +33,9 @@ export default {
         this.displayNumber += 1;
       }
       else {this.displayNumber -= 1}
+        if (this.displayNumber < this.number + 1 && this.displayNumber > this.displayNumber - 1) {
+          this.displayNumber = this.number;
+        }
         requestAnimationFrame(this.update_number)
       }
   }

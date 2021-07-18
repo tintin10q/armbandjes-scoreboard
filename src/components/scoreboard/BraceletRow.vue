@@ -1,32 +1,34 @@
 <template>
-  <div class="clickable">
-    <div class="tr" @click="show = !show; this.$emit('clicked',this.bracelet_id)">
+  <div class="clickable" @click="expand=!expand; ">
+
+    <div class="tr">
+
       <div class="td">{{ name }}</div>
       <div class="td">
-        <animated-number :number="points"/>
+        <b-spinner v-if="loading"/>
+        <animated-number v-show="!loading" :number="points"/>
       </div>
       <div class="td">{{ group }}</div>
     </div>
-    <div v-if="show" class="d-flex justify-content-around flex-column" @click="show = !show; this.$emit('clicked',this.bracelet_id)" >
+    <div v-if="expand" class="d-flex justify-content-around flex-column" @click="expand = !expand; this.$emit('clicked',this.bracelet_id)" >
       <graph-line
           :width="600"
           :height="400"
           :shape="'normal'"
           :axis-min="0"
-          :axis-max="Math.max(pointsMax, points)"
+          :axis-max="Math.max(pointsMax, points) + 2"
           :axis-full-mode="true"
           :labels="graph_labels"
           :names="graph_names"
           :values="graph_values">
-        <note :text="'Line Chart ' + name + ' Gemiddeld: ' + pointsAvg"/>
+        <note :text="'Line Chart ' + name + ' Gemiddeld: ' + parseFloat(pointsAvg).toFixed(2)"/>
         <tooltip :names="graph_names" :position="'right'"></tooltip>
         <legends :names="graph_names"></legends>
         <guideline :tooltip-y="true"></guideline>
       </graph-line>
-      <div class="d-flex align-items-start justify-content-start events m-2">
+      <div class="d-flex events">
         <event v-for="event in eventsSorted" :key="event.id" :description="event.description" :points="event.points"/>
       </div>
-
     </div>
   </div>
 </template>
@@ -38,13 +40,18 @@ import gql from "graphql-tag";
 export default {
   name: "BraceletRow",
   async mounted() {
+    this.loading = true
+    const bracelet_promise = await this.query_bracelet()
+    this.bracelet = bracelet_promise.data.getBracelet
     await this.subscribe_to_bracelets()
-    },
+    this.loading = false
+  },
   // eslint-disable-next-line vue/no-unused-components
   components: {Event, AnimatedNumber},
   data() {
     return {
-      show: false,
+      expand: false,
+      loading: false,
       bracelet: {}
     }
 
@@ -115,8 +122,42 @@ export default {
       type: Boolean,
       default: false
     }
+    // expand: {
+    //   type: Boolean,
+    //   default: false
+    // }
   },
     methods: {
+      async query_bracelet() {
+        return  this.$apollo.query({
+          query: gql`query BraceletUpdate($id: ID) {
+            getBracelet(id: $id) {
+              name
+              id
+              group {
+                name
+                id
+              }
+              events {
+                created_at
+                description
+                id
+                points
+              }
+              eventsAggregate {
+                count
+                pointsAvg
+                pointsMax
+                pointsMin
+                pointsSum
+              }
+              bracelet_id
+            }
+          }`,
+          variables: {id: this.bracelet_id}
+        })
+
+      },
       async subscribe_to_bracelets() {
         this.$apollo.addSmartSubscription('newGroupData', {
           query: gql`subscription BraceletUpdate($id: ID) {
@@ -144,14 +185,14 @@ export default {
   }
 }`, // We can handle 100 message fetch no problem...
           // Parameters
-          variables: () => {
+          variables: async () => {
             return {id: this.bracelet_id}
           },
-          result(result) {
+          async result(result) {
             const new_message = result.data;
-            console.log(new_message)
-            this.bracelet = new_message.getBracelet
-            console.log("22", this.bracelet)
+            if (new_message.getBracelet) {
+              this.bracelet = new_message.getBracelet
+            }
             return this.bracelet
           }
         })

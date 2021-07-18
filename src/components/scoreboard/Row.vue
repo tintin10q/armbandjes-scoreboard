@@ -9,9 +9,6 @@
 
 export default {
   name: "row",
-  mounted() {
-    console.log(this.labels)
-    },
   props: {
     labels: {
       type: Array

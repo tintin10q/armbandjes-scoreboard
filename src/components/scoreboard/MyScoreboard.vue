@@ -4,7 +4,7 @@
     <div class="tr th">
       <div v-for="label in labels" :key="label" class="td">{{label}}</div>
     </div>
-    <bracelet-row v-for="bracelet in bracelets_sorted" :key="bracelet.id" :bracelet_id="bracelet.id"></bracelet-row>
+    <bracelet-row @click="expand = !expand" expand v-for="bracelet in bracelets_sorted" :key="bracelet.id" :bracelet_id="bracelet.id"></bracelet-row>
   </div>
   <!--  </table>-->
 </template>
@@ -14,13 +14,22 @@ import BraceletRow from "@/components/scoreboard/BraceletRow";
 
 export default {
   name: "MyScoreboard",
-  // eslint-disable-next-line vue/no-unused-components
   components: {BraceletRow},
+  mounted() {
+    this.loading = false;
+  },
+  data() {
+    return {
+      expand:false,
+      loading: true,
+      sorted_bracelets: []
+    }
+    },
   computed: {
     bracelets_sorted() {
-      let bracelets = [...this.bracelets]
-      bracelets.sort((a, b) => (a?.points < b?.points) ? 1 : -1)
-      return bracelets
+      // let bracelets = [...this.bracelets]
+      // bracelets.sort((a, b) => (a?.points < b?.points) ? 1 : -1)
+      return this.bracelets
     }
   },
   props: {

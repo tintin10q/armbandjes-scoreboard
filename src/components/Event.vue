@@ -1,10 +1,10 @@
 <template>
-<div class="d-inline align-items-center justify-content-between align-content-start">
+<div class="d-flex flex-column">
   <div class="p-2 m-2 event align-items-center justify-content-center">
     <span v-if="points>1">+</span><animated-number :number="points"/>
   </div>
-  <div >
-  <p class="d-inline-flex maxh align-content-start flex-grow-1 justify-content-start">{{description}}</p>
+  <div>
+    <p class="m-2 ">{{description}}</p>
   </div>
   </div>
 </template>
@@ -25,6 +25,7 @@ export default {
    outline: black solid 3px;
  }
  .maxh {
-   max-height: 4ch;
+   max-height: 8ch;
+   min-width: 10ch;
  }
 </style>

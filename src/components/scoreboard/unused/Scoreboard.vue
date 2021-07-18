@@ -34,8 +34,8 @@ export default {
   name: "scoreboard",
   async mounted() {
     try {
-      this.bracelets = await this.get_bracelets();
-      console.log(this.bracelets);
+      let bracelets = await this.get_bracelets();
+      this.bracelets = bracelets.data.getBracelet
       this.loading = false
     } catch (error) {
       this.errored = true
@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     async get_bracelets() {
-      const result = await this.$apollo.query({
+      const result = this.$apollo.query({
         // Query
         query: `query getBracelets {
           queryBracelet(first: 100) {
@@ -75,7 +75,6 @@ export default {
     }`
       })
 
-      console.log(result)
       // await Promise.all(result.data.queryBracelet.map(async (bracelet) => {
       //
       //   bracelet.points = bracelet?.eventsAggregate?.pointsSum;
@@ -85,7 +84,7 @@ export default {
       // }));
       // return result.data.queryBracelet
       // },
-      return {}
+      return result
     },
   },
   computed: {}

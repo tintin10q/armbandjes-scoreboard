@@ -92,7 +92,6 @@ export default {
     }`
       })
 
-      console.log(result)
       await Promise.all(result.data.queryBracelet.map(async (bracelet) => {
 
         bracelet.points = bracelet?.eventsAggregate?.pointsSum;
